@@ -1,21 +1,29 @@
 --- #YAML:1.0
 name:               Mojolicious-Plugin-Qooxdoo
-version:            0.1
+version:            0.2
 abstract:           Qooxdoo JSON-RPC support for the Mojolicious Perl framework
 author:
     - Tobias Oetiker <tobi@oetiker.ch>
-license:            perl
+license:            artistic_2
 distribution_type:  module
 configure_requires:
-    ExtUtils::MakeMaker:  6.31
+    ExtUtils::MakeMaker:  0
 build_requires:
-    Test::More:  0
+    ExtUtils::MakeMaker:  0
 requires:
     Mojolicious:  4.0
+    perl:         5.010001
+resources:
+    bugtracker:  https://github.com/oetiker/Mojolicious-Plugin-Qooxdoo/issues
+    license:     http://www.opensource.org/licenses/artistic-license-2.0
+    repository:  https://github.com/oetiker/Mojolicious-Plugin-Qooxdoo
 no_index:
     directory:
         - t
         - inc
+        - t
+        - example
+        - setup
 generated_by:       ExtUtils::MakeMaker version 6.57_05
 meta-spec:
     url:      http://module-build.sourceforge.net/META-spec-v1.4.html
