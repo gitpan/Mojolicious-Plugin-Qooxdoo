@@ -4,7 +4,7 @@ use Mojo::Base 'Mojolicious::Plugin';
 use File::Spec::Functions qw(splitdir updir catdir file_name_is_absolute);
 use Cwd qw(abs_path);
 
-our $VERSION = '0.5';
+our $VERSION = '0.6';
 
 sub register {
     my ($self, $app, $conf) = @_;
@@ -34,10 +34,10 @@ sub register {
         my %prefixCache;
         my $static = Mojolicious::Static->new();
         my $static_cb = sub {
-            my $self = shift;
-            my $prefix = $self->param('prefix');    
-            if ($self->param('file')){
-                $self->req->url->path('/'.$prefix.'/'.$self->param('file'));
+            my $ctrl = shift;
+            my $prefix = $ctrl->param('prefix');    
+            if ($ctrl->param('file')){
+                $ctrl->req->url->path('/'.$prefix.'/'.$ctrl->param('file'));
             }
             if (not defined $prefixCache{$prefix}){
                 my $prefix_local = catdir(split /\//, $prefix);
@@ -52,8 +52,8 @@ sub register {
             } 
             $static->paths([$prefixCache{$prefix}]);
 
-            unless ($static->dispatch($self)){
-                $self->render(text=>$self->req->url->path.' not found', status => 404);
+            unless ($static->dispatch($ctrl)){
+                $ctrl->render(text=>$ctrl->req->url->path.' not found', status => 404);
             }
         };
 
@@ -71,8 +71,9 @@ sub register {
     else {
         # redirect root to index.html
         $r->get($root => sub {
-             $self->req->url->path('/index.html');
-             return $app->static->dispatch($self);
+            my $ctrl = shift;
+            $ctrl->req->url->path('/index.html');
+            return $app->static->dispatch($ctrl);
         });
      }
 }
@@ -89,8 +90,8 @@ Mojolicious::Plugin::Qooxdoo - System for writing Qooxdoo backend code with Mojo
 
  # lib/your-application.pm
 
- use base 'Mojolicious';
- use RpcService;
+ use Mojo::Base 'Mojolicious';
+ use MyJsonRpcController;
  
  sub startup {
     my $self = shift;
@@ -98,18 +99,18 @@ Mojolicious::Plugin::Qooxdoo - System for writing Qooxdoo backend code with Mojo
     $self->plugin('qooxdoo',{
         prefix => '/',
         path => 'jsonrpc',
-        controller => 'rpc_service'
+        controller => 'my_json_rpc_conroller'
     });
  }
 
 
 =head1 DESCRIPTION
 
-To deal with incoming JSON-RPC requests, write a controller decending from L<Mojolicious::Plugin::Qooxdoo::JsonRpc>
-instead of the normal L<Mojolicious::Controller> class. 
+To deal with incoming JSON-RPC requests, write a controller using L<Mojolicious::Plugin::Qooxdoo::JsonRpcController>
+as a parent, instead of the normal L<Mojolicious::Controller> class.
 
-See the documentation on L<Mojolicious::Plugin::Qooxdoo::Jsonrpc>
-for details on how to write your service. 
+See the documentation in L<Mojolicious::Plugin::Qooxdoo::JsonRpcController>
+for details on how to write a qooxdoo json rpc controller. 
 
 The plugin understands the following parameters.
 
@@ -122,13 +123,13 @@ you can move them down the tree.
 
 =item B<controller>
 
-The name of your RpcService controller class. See L<Mojolicious::Plugin::Qooxdoo::JsonRpc> for details on how
+The name of your RpcService controller class. See L<Mojolicious::Plugin::Qooxdoo::JsonRpcController> for details on how
 to write a service. If no controller argument is specified, the plugin will only install the routes
 necessary to server the qooxdoo javascript files and assets.
 
 =item B<namespace>
 
-If your controller class is NOT under the application namespace.
+If your controller class does not reside in the the application namespace.
 
 =item B<path> (default: jsonrpc)
 
@@ -147,7 +148,7 @@ version of your application. Set the C<QX_SRC_MODE> environment variable to
 "1" to activate the source mode. By default, the module expects to find the
 source of your application in F<MOJO_HOME/../frontend/source> if you keep
 the source somewhere else you can set the alternate location via
-C<QX_SRC_PATH> either absolute or relative to the MOJO_HOME directory.
+C<QX_SRC_PATH> either absolute or relative to the C<MOJO_HOME> directory.
 
 In production mode, the plugin expects to find the result of your
 C<generate.py build> run in mojos F<public> directory. 
