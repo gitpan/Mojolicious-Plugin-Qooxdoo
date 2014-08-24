@@ -1,6 +1,6 @@
 --- #YAML:1.0
 name:               Mojolicious-Plugin-Qooxdoo
-version:            0.8
+version:            0.9
 abstract:           Qooxdoo JSON-RPC support for the Mojolicious Perl framework
 author:
     - Tobias Oetiker <tobi@oetiker.ch>
